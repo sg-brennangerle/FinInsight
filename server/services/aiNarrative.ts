@@ -1,9 +1,7 @@
-import OpenAI from "openai";
+import { GoogleGenAI } from "@google/genai";
 
-// the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
-const openai = new OpenAI({ 
-  apiKey: process.env.OPENAI_API_KEY || process.env.OPENAI_KEY || ""
-});
+// Using Gemini 2.5 Flash for financial narrative generation
+const genai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || "" });
 
 export interface NarrativeRequest {
   kpis: Record<string, any>;
@@ -26,24 +24,28 @@ export class AINarrativeGenerator {
     try {
       const prompt = this.buildPrompt(request);
       
-      const response = await openai.chat.completions.create({
-        model: "gpt-4o",
-        messages: [
-          {
-            role: "system",
-            content: "You are a financial analyst expert who creates clear, professional business narratives from P&L data. Generate insights that are actionable and appropriate for the target audience."
-          },
-          {
-            role: "user",
-            content: prompt
+      const response = await genai.models.generateContent({
+        model: "gemini-2.5-pro",
+        config: {
+          systemInstruction: "You are a financial analyst expert who creates clear, professional business narratives from P&L data. Generate insights that are actionable and appropriate for the target audience.",
+          responseMimeType: "application/json",
+          responseSchema: {
+            type: "object",
+            properties: {
+              executiveSummary: { type: "string" },
+              keyInsights: { type: "array", items: { type: "string" } },
+              recommendations: { type: "array", items: { type: "string" } },
+              talkingPoints: { type: "array", items: { type: "string" } },
+              wins: { type: "array", items: { type: "string" } },
+              areasOfFocus: { type: "array", items: { type: "string" } }
+            },
+            required: ["executiveSummary", "keyInsights", "recommendations", "talkingPoints", "wins", "areasOfFocus"]
           }
-        ],
-        response_format: { type: "json_object" },
-        temperature: 0.7,
-        max_tokens: 2000,
+        },
+        contents: prompt,
       });
 
-      const result = JSON.parse(response.choices[0].message.content || "{}");
+      const result = JSON.parse(response.text || "{}");
       return this.validateAndStructureResponse(result);
     } catch (error) {
       throw new Error(`AI narrative generation failed: ${(error as Error).message}`);

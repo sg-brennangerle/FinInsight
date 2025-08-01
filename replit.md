@@ -41,7 +41,7 @@ Preferred communication style: Simple, everyday language.
 - **Output**: Structured reports with executive summaries, insights, and recommendations
 
 ## AI Narrative Generation
-- **Model**: OpenAI GPT-4o for consistent and reliable output
+- **Model**: Google Gemini 2.5 Pro for financial narrative generation
 - **Processing Types**: Executive summaries, KPI analysis, and trend analysis
 - **Audience Targeting**: Configurable for executive, team leads, or all-company audiences
 - **Output Structure**: JSON-formatted responses with actionable insights and recommendations
@@ -49,7 +49,7 @@ Preferred communication style: Simple, everyday language.
 # External Dependencies
 
 ## Core Services
-- **OpenAI API**: GPT-4o model for AI-powered narrative generation
+- **Google Gemini API**: Gemini 2.5 Pro model for AI-powered narrative generation
 - **Neon Database**: PostgreSQL serverless database for production data storage
 
 ## Frontend Libraries
