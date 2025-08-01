@@ -150,6 +150,13 @@ export class MemStorage implements IStorage {
       this.reports.set(id, report);
     }
   }
+
+  // Clear all temporary data except the default user
+  clearAllData(): void {
+    this.plFiles.clear();
+    this.plData.clear();
+    this.reports.clear();
+  }
 }
 
 export const storage = new MemStorage();
