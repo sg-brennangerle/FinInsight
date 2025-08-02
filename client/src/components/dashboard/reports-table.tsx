@@ -156,32 +156,35 @@ export default function ReportsTable() {
                           {getStatusBadge(report.status)}
                         </td>
                         <td className="px-4 py-4 whitespace-nowrap text-sm font-medium">
-                          <div className="flex space-x-2">
+                          <div className="flex items-center space-x-3">
                             <Button
-                              variant="ghost"
-                              size="icon"
-                              className={isReady ? "text-blue-600 hover:text-blue-900" : "text-slate-300 cursor-not-allowed"}
+                              variant={isReady ? "default" : "ghost"}
+                              size="sm"
+                              className={isReady ? "bg-blue-600 hover:bg-blue-700 text-white" : "text-slate-300 cursor-not-allowed"}
                               disabled={!isReady}
                               onClick={() => isReady && setSelectedReport(report)}
                             >
-                              <Eye className="h-4 w-4" />
+                              <Eye className="h-4 w-4 mr-2" />
+                              View Report
                             </Button>
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              className={isReady ? "text-slate-400 hover:text-slate-600" : "text-slate-300 cursor-not-allowed"}
-                              disabled={!isReady}
-                            >
-                              <Download className="h-4 w-4" />
-                            </Button>
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              className={isReady ? "text-slate-400 hover:text-slate-600" : "text-slate-300 cursor-not-allowed"}
-                              disabled={!isReady}
-                            >
-                              <Share className="h-4 w-4" />
-                            </Button>
+                            <div className="flex space-x-1">
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className={isReady ? "text-slate-400 hover:text-slate-600" : "text-slate-300 cursor-not-allowed"}
+                                disabled={!isReady}
+                              >
+                                <Download className="h-4 w-4" />
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className={isReady ? "text-slate-400 hover:text-slate-600" : "text-slate-300 cursor-not-allowed"}
+                                disabled={!isReady}
+                              >
+                                <Share className="h-4 w-4" />
+                              </Button>
+                            </div>
                           </div>
                         </td>
                       </tr>

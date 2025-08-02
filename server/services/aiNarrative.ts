@@ -1,7 +1,11 @@
 import { GoogleGenAI } from "@google/genai";
 
-// Using Gemini 2.5 Flash for financial narrative generation
-const genai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || "" });
+// Using Gemini 1.5 Pro for financial narrative generation
+if (!process.env.GEMINI_API_KEY) {
+  throw new Error('GEMINI_API_KEY environment variable is required');
+}
+
+const genai = new GoogleGenAI(process.env.GEMINI_API_KEY);
 
 export interface NarrativeRequest {
   kpis: Record<string, any>;
@@ -24,10 +28,10 @@ export class AINarrativeGenerator {
     try {
       const prompt = this.buildPrompt(request);
       
-      const response = await genai.models.generateContent({
-        model: "gemini-2.5-pro",
-        config: {
-          systemInstruction: "You are a financial analyst expert who creates clear, professional business narratives from P&L data. Generate insights that are actionable and appropriate for the target audience.",
+      const model = genai.getGenerativeModel({
+        model: "gemini-1.5-pro",
+        systemInstruction: "You are a financial analyst expert who creates clear, professional business narratives from P&L data. Generate insights that are actionable and appropriate for the target audience.",
+        generationConfig: {
           responseMimeType: "application/json",
           responseSchema: {
             type: "object",
@@ -41,11 +45,11 @@ export class AINarrativeGenerator {
             },
             required: ["executiveSummary", "keyInsights", "recommendations", "talkingPoints", "wins", "areasOfFocus"]
           }
-        },
-        contents: prompt,
+        }
       });
 
-      const result = JSON.parse(response.text || "{}");
+      const response = await model.generateContent(prompt);
+      const result = JSON.parse(response.response.text() || "{}");
       return this.validateAndStructureResponse(result);
     } catch (error) {
       throw new Error(`AI narrative generation failed: ${(error as Error).message}`);

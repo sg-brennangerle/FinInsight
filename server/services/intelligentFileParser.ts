@@ -1,7 +1,11 @@
 import { GoogleGenAI } from "@google/genai";
 import * as xlsx from 'xlsx';
 
-const genai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || "" });
+if (!process.env.GEMINI_API_KEY) {
+  throw new Error('GEMINI_API_KEY environment variable is required');
+}
+
+const genai = new GoogleGenAI(process.env.GEMINI_API_KEY);
 
 export interface IntelligentParseResult {
   success: boolean;
@@ -91,9 +95,9 @@ Respond with JSON only:
   "amountColumn": "column letter or index"
 }`;
 
-      const response = await genai.models.generateContent({
-        model: "gemini-2.5-pro",
-        config: {
+      const model = genai.getGenerativeModel({
+        model: "gemini-1.5-pro",
+        generationConfig: {
           responseMimeType: "application/json",
           responseSchema: {
             type: "object",
@@ -108,11 +112,11 @@ Respond with JSON only:
             },
             required: ["headerRow", "categoryColumn", "amountColumn"]
           }
-        },
-        contents: prompt
+        }
       });
 
-      const structure = JSON.parse(response.text || "{}");
+      const response = await model.generateContent(prompt);
+      const structure = JSON.parse(response.response.text() || "{}");
       return { success: true, structure };
     } catch (error) {
       console.error('AI structure analysis failed:', error);
