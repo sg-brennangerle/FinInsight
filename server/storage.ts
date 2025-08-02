@@ -1,5 +1,6 @@
-import { type User, type InsertUser, type PlFile, type InsertPlFile, type PlData, type InsertPlData, type Report, type InsertReport } from "@shared/schema";
-import { randomUUID } from "crypto";
+import { users, plFiles, plData, reports, type User, type InsertUser, type PlFile, type InsertPlFile, type PlData, type InsertPlData, type Report, type InsertReport } from "@shared/schema";
+import { db } from "./db";
+import { eq } from "drizzle-orm";
 
 export interface IStorage {
   getUser(id: string): Promise<User | undefined>;
@@ -21,142 +22,91 @@ export interface IStorage {
   updateReportStatus(id: string, status: string): Promise<void>;
 }
 
-export class MemStorage implements IStorage {
-  private users: Map<string, User>;
-  private plFiles: Map<string, PlFile>;
-  private plData: Map<string, PlData>;
-  private reports: Map<string, Report>;
-
-  constructor() {
-    this.users = new Map();
-    this.plFiles = new Map();
-    this.plData = new Map();
-    this.reports = new Map();
-    
-    // Create a default user for demo purposes
-    const defaultUser: User = {
-      id: "user-1",
-      username: "sarah.johnson",
-      password: "password",
-      name: "Sarah Johnson",
-      role: "Finance Manager",
-      createdAt: new Date(),
-    };
-    this.users.set(defaultUser.id, defaultUser);
-  }
-
+export class DatabaseStorage implements IStorage {
   async getUser(id: string): Promise<User | undefined> {
-    return this.users.get(id);
+    const [user] = await db.select().from(users).where(eq(users.id, id));
+    return user || undefined;
   }
 
   async getUserByUsername(username: string): Promise<User | undefined> {
-    return Array.from(this.users.values()).find(
-      (user) => user.username === username,
-    );
+    const [user] = await db.select().from(users).where(eq(users.username, username));
+    return user || undefined;
   }
 
   async createUser(insertUser: InsertUser): Promise<User> {
-    const id = randomUUID();
-    const user: User = { 
-      ...insertUser, 
-      id, 
-      role: insertUser.role || "Finance Manager",
-      createdAt: new Date() 
-    };
-    this.users.set(id, user);
+    const [user] = await db
+      .insert(users)
+      .values(insertUser)
+      .returning();
     return user;
   }
 
   async createPlFile(insertFile: InsertPlFile): Promise<PlFile> {
-    const id = randomUUID();
-    const file: PlFile = { 
-      ...insertFile,
-      status: insertFile.status || "uploaded",
-      id, 
-      uploadedAt: new Date(), 
-      processedAt: null 
-    };
-    this.plFiles.set(id, file);
+    const [file] = await db
+      .insert(plFiles)
+      .values(insertFile)
+      .returning();
     return file;
   }
 
   async getPlFile(id: string): Promise<PlFile | undefined> {
-    return this.plFiles.get(id);
+    const [file] = await db.select().from(plFiles).where(eq(plFiles.id, id));
+    return file || undefined;
   }
 
   async getPlFilesByUserId(userId: string): Promise<PlFile[]> {
-    return Array.from(this.plFiles.values()).filter(file => file.userId === userId);
+    return await db.select().from(plFiles).where(eq(plFiles.userId, userId));
   }
 
   async updatePlFileStatus(id: string, status: string, processedAt?: Date): Promise<void> {
-    const file = this.plFiles.get(id);
-    if (file) {
-      file.status = status;
-      if (processedAt) {
-        file.processedAt = processedAt;
-      }
-      this.plFiles.set(id, file);
-    }
+    await db
+      .update(plFiles)
+      .set({ 
+        status, 
+        ...(processedAt && { processedAt }) 
+      })
+      .where(eq(plFiles.id, id));
   }
 
   async createPlData(insertData: InsertPlData): Promise<PlData> {
-    const id = randomUUID();
-    const data: PlData = { 
-      ...insertData, 
-      id, 
-      expenseBreakdown: insertData.expenseBreakdown || null,
-      createdAt: new Date() 
-    };
-    this.plData.set(id, data);
+    const [data] = await db
+      .insert(plData)
+      .values(insertData)
+      .returning();
     return data;
   }
 
   async getPlDataByFileId(fileId: string): Promise<PlData[]> {
-    return Array.from(this.plData.values()).filter(data => data.fileId === fileId);
+    return await db.select().from(plData).where(eq(plData.fileId, fileId));
   }
 
   async createReport(insertReport: InsertReport): Promise<Report> {
-    const id = randomUUID();
-    const report: Report = { 
-      ...insertReport, 
-      id, 
-      status: insertReport.status || "ready",
-      audienceLevel: insertReport.audienceLevel || "executive",
-      keyInsights: insertReport.keyInsights || null,
-      kpis: insertReport.kpis || null,
-      recommendations: insertReport.recommendations || null,
-      generatedAt: new Date() 
-    };
-    this.reports.set(id, report);
+    const [report] = await db
+      .insert(reports)
+      .values(insertReport)
+      .returning();
     return report;
   }
 
   async getReport(id: string): Promise<Report | undefined> {
-    return this.reports.get(id);
+    const [report] = await db.select().from(reports).where(eq(reports.id, id));
+    return report || undefined;
   }
 
   async getReportsByUserId(userId: string): Promise<Report[]> {
-    return Array.from(this.reports.values()).filter(report => report.userId === userId);
+    return await db.select().from(reports).where(eq(reports.userId, userId));
   }
 
   async getReportsByFileId(fileId: string): Promise<Report[]> {
-    return Array.from(this.reports.values()).filter(report => report.fileId === fileId);
+    return await db.select().from(reports).where(eq(reports.fileId, fileId));
   }
 
   async updateReportStatus(id: string, status: string): Promise<void> {
-    const report = this.reports.get(id);
-    if (report) {
-      report.status = status;
-      this.reports.set(id, report);
-    }
-  }
-
-  // Clear all temporary data except the default user
-  clearAllData(): void {
-    this.plFiles.clear();
-    this.plData.clear();
-    this.reports.clear();
+    await db
+      .update(reports)
+      .set({ status })
+      .where(eq(reports.id, id));
   }
 }
 
-export const storage = new MemStorage();
+export const storage = new DatabaseStorage();

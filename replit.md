@@ -21,13 +21,13 @@ Preferred communication style: Simple, everyday language.
 - **File Processing**: Multer for file uploads with support for CSV and Excel formats
 - **AI Integration**: OpenAI GPT-4o for generating financial narratives and insights
 - **Data Processing**: Custom FileProcessor service for parsing spreadsheet data
-- **Storage**: In-memory storage implementation with interface for future database integration
+- **Storage**: PostgreSQL database with DatabaseStorage implementation for persistent data
 
 ## Data Storage Solutions
 - **ORM**: Drizzle ORM configured for PostgreSQL with type-safe schema definitions
 - **Database**: PostgreSQL with Neon serverless driver for cloud deployment
-- **Schema**: Well-defined tables for users, files, P&L data, and generated reports
-- **Current Implementation**: Memory-based storage for development with database-ready interfaces
+- **Schema**: Well-defined tables for users, files, P&L data, and generated reports with proper relations
+- **Current Implementation**: PostgreSQL database with DatabaseStorage replacing MemStorage (Updated: Aug 2, 2025)
 
 ## Authentication and Authorization
 - **Current State**: Simplified user system with hardcoded demo user

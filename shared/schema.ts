@@ -1,4 +1,4 @@
-import { sql } from "drizzle-orm";
+import { sql, relations } from "drizzle-orm";
 import { pgTable, text, varchar, timestamp, jsonb, decimal, integer } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
@@ -73,6 +73,39 @@ export const insertReportSchema = createInsertSchema(reports).omit({
   id: true,
   generatedAt: true,
 });
+
+// Relations
+export const usersRelations = relations(users, ({ many }) => ({
+  plFiles: many(plFiles),
+  reports: many(reports),
+}));
+
+export const plFilesRelations = relations(plFiles, ({ one, many }) => ({
+  user: one(users, {
+    fields: [plFiles.userId],
+    references: [users.id],
+  }),
+  plData: many(plData),
+  reports: many(reports),
+}));
+
+export const plDataRelations = relations(plData, ({ one }) => ({
+  file: one(plFiles, {
+    fields: [plData.fileId],
+    references: [plFiles.id],
+  }),
+}));
+
+export const reportsRelations = relations(reports, ({ one }) => ({
+  file: one(plFiles, {
+    fields: [reports.fileId],
+    references: [plFiles.id],
+  }),
+  user: one(users, {
+    fields: [reports.userId],
+    references: [users.id],
+  }),
+}));
 
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type User = typeof users.$inferSelect;
