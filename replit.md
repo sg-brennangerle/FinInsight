@@ -36,9 +36,16 @@ Preferred communication style: Simple, everyday language.
 
 ## File Processing Pipeline
 - **Upload**: Drag-and-drop interface with file validation (CSV/Excel only, 10MB limit)
+- **Intelligent Parsing**: AI-powered spreadsheet structure analysis for complex QuickBooks exports
 - **Processing**: Automatic parsing of P&L data with validation and transformation
 - **Analysis**: AI-powered narrative generation with customizable audience levels
 - **Output**: Structured reports with executive summaries, insights, and recommendations
+
+## Intelligent File Processing
+- **AI Structure Detection**: Gemini 2.5 Pro analyzes spreadsheet layout and identifies columns
+- **Complex Format Support**: Handles QuickBooks exports with income/expense categorization
+- **Automatic Totaling**: Recognizes "total" rows and calculates category summaries
+- **Fallback Processing**: Standard parsing for simple CSV/Excel formats
 
 ## AI Narrative Generation
 - **Model**: Google Gemini 2.5 Pro for financial narrative generation

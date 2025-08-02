@@ -1,6 +1,8 @@
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { TrendingUp, TrendingDown, BarChart3, PieChart, DollarSign, Calendar } from "lucide-react";
+import Sidebar from "@/components/layout/sidebar";
+import Header from "@/components/layout/header";
 
 export default function Analytics() {
   const { data: stats, isLoading: statsLoading } = useQuery({
@@ -17,20 +19,23 @@ export default function Analytics() {
 
   if (statsLoading || reportsLoading || filesLoading) {
     return (
-      <div className="min-h-screen bg-slate-50 p-6">
-        <div className="max-w-7xl mx-auto">
-          <div className="mb-8">
-            <h1 className="text-3xl font-bold text-slate-900">Analytics</h1>
-            <p className="text-slate-600 mt-2">Comprehensive insights from your financial data</p>
-          </div>
-          <div className="animate-pulse space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-              {[...Array(4)].map((_, i) => (
-                <div key={i} className="bg-white h-32 rounded-lg"></div>
-              ))}
+      <div className="min-h-screen flex bg-slate-50">
+        <Sidebar />
+        <main className="flex-1 flex flex-col overflow-hidden">
+          <Header 
+            title="Analytics"
+            subtitle="Comprehensive insights from your financial data"
+          />
+          <div className="flex-1 overflow-auto p-6">
+            <div className="animate-pulse space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                {[...Array(4)].map((_, i) => (
+                  <div key={i} className="bg-white h-32 rounded-lg"></div>
+                ))}
+              </div>
             </div>
           </div>
-        </div>
+        </main>
       </div>
     );
   }
@@ -49,12 +54,14 @@ export default function Analytics() {
     : 0;
 
   return (
-    <div className="min-h-screen bg-slate-50 p-6">
-      <div className="max-w-7xl mx-auto">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-slate-900">Analytics</h1>
-          <p className="text-slate-600 mt-2">Comprehensive insights from your financial data</p>
-        </div>
+    <div className="min-h-screen flex bg-slate-50">
+      <Sidebar />
+      <main className="flex-1 flex flex-col overflow-hidden">
+        <Header 
+          title="Analytics"
+          subtitle="Comprehensive insights from your financial data"
+        />
+        <div className="flex-1 overflow-auto p-6">
 
         {/* Key Metrics */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
@@ -229,7 +236,8 @@ export default function Analytics() {
             )}
           </CardContent>
         </Card>
-      </div>
+        </div>
+      </main>
     </div>
   );
 }

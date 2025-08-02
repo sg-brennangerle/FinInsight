@@ -1,6 +1,7 @@
 import * as xlsx from 'xlsx';
 import csv from 'csv-parser';
 import { Readable } from 'stream';
+import { IntelligentFileParser } from './intelligentFileParser';
 
 export interface ParsedPLData {
   period: string;
@@ -17,20 +18,31 @@ export interface ProcessingResult {
 }
 
 export class FileProcessor {
+  private intelligentParser = new IntelligentFileParser();
+
   async processFile(buffer: Buffer, filename: string, mimeType: string): Promise<ProcessingResult> {
     try {
-      let data: any[];
-      
+      // Try intelligent parsing first for Excel files
       if (mimeType.includes('sheet') || filename.endsWith('.xlsx') || filename.endsWith('.xls')) {
-        data = await this.processExcelFile(buffer);
+        const intelligentResult = await this.intelligentParser.parseComplexSpreadsheet(buffer, filename);
+        
+        if (intelligentResult.success && intelligentResult.data) {
+          // Transform intelligent parse results to standard P&L format
+          const plData = this.intelligentParser.transformToPLData(intelligentResult.data);
+          return { success: true, data: plData };
+        }
+        
+        // Fallback to standard Excel processing
+        const data = await this.processExcelFile(buffer);
+        const validatedData = this.validateAndTransformData(data);
+        return { success: true, data: validatedData };
       } else if (mimeType.includes('csv') || filename.endsWith('.csv')) {
-        data = await this.processCsvFile(buffer);
+        const data = await this.processCsvFile(buffer);
+        const validatedData = this.validateAndTransformData(data);
+        return { success: true, data: validatedData };
       } else {
         return { success: false, error: 'Unsupported file format. Please upload CSV or Excel files.' };
       }
-
-      const validatedData = this.validateAndTransformData(data);
-      return { success: true, data: validatedData };
     } catch (error) {
       return { success: false, error: `File processing failed: ${(error as Error).message}` };
     }
